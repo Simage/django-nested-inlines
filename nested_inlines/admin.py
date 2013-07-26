@@ -45,14 +45,14 @@ class NestedModelAdmin(ModelAdmin):
         
         #iterate through the nested formsets and save them
         #skip formsets, where the parent is marked for deletion
-        if hasattr(formset, 'deleted_forms'):#quick hack to allow redirect after add -JH
+        if hasattr(formset, 'deleted_forms'):#quick hack to allow can_delete=False -JH
             deleted_forms = formset.deleted_forms
         else:
             deleted_forms = []
         for form in formset.forms:
             if hasattr(form, 'nested_formsets') and form not in deleted_forms:
                 for nested_formset in form.nested_formsets:
-                    self.save_formset(request, form, nested_formset, change)
+                    super(NestedModelAdmin, self).save_formset(request, form, nested_formset, change)
                     
     def add_nested_inline_formsets(self, request, inline, formset, depth=0):
         if depth > 5:
@@ -158,10 +158,17 @@ class NestedModelAdmin(ModelAdmin):
                 if inline.inlines:
                     self.add_nested_inline_formsets(request, inline, formset)
             if self.all_valid_with_nesting(formsets) and form_validated:
-                self.save_model(request, new_object, form, False)
-                self.save_related(request, form, formsets, False)
-                self.log_addition(request, new_object)
-                return self.response_add(request, new_object)
+                
+                super(NestedModelAdmin, self).save_model(request, new_object, form, False)
+                super(NestedModelAdmin, self).save_related(request, form, formsets, False)
+                super(NestedModelAdmin, self).log_addition(request, new_object)
+                
+#                self.save_model(request, new_object, form, False)
+#                self.save_related(request, form, formsets, False)
+#                self.log_addition(request, new_object)
+                #fix to redirect to change_list page after adding an object
+                return super(NestedModelAdmin, self).add_view(request, form_url, extra_context)
+#                return super(NestedModelAdmin, self).response_add(request, new_object)
         else:
             # Prepare the dict of initial data from the request.
             # We have to special-case M2Ms as a list of comma-separated PKs.
@@ -215,7 +222,8 @@ class NestedModelAdmin(ModelAdmin):
             'app_label': opts.app_label,
         }
         context.update(extra_context or {})
-        return self.render_change_form(request, context, form_url=form_url, add=True)
+        return super(NestedModelAdmin, self).add_view(request, form_url, extra_context)
+#        return self.render_change_form(request, context, form_url=form_url, add=True)
 
     @csrf_protect_m
     @transaction.commit_on_success
@@ -267,6 +275,7 @@ class NestedModelAdmin(ModelAdmin):
                 change_message = self.construct_change_message(request, form, formsets)
                 self.log_change(request, new_object, change_message)
                 return self.response_change(request, new_object)
+#                return super(NestedModelAdmin, self).change_view(request, object_id, form_url, extra_context)
 
         else:
             form = ModelForm(instance=obj)
@@ -312,6 +321,7 @@ class NestedModelAdmin(ModelAdmin):
             'app_label': opts.app_label,
         }
         context.update(extra_context or {})
+#        return super(NestedModelAdmin, self).change_view(request, object_id, form_url, extra_context)
         return self.render_change_form(request, context, change=True, obj=obj, form_url=form_url)
 
 class NestedInlineModelAdmin(InlineModelAdmin):
