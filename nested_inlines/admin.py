@@ -157,18 +157,12 @@ class NestedModelAdmin(ModelAdmin):
                 formsets.append(formset)
                 if inline.inlines:
                     self.add_nested_inline_formsets(request, inline, formset)
-            if self.all_valid_with_nesting(formsets) and form_validated:
-                
-                super(NestedModelAdmin, self).save_model(request, new_object, form, False)
-                super(NestedModelAdmin, self).save_related(request, form, formsets, False)
-                super(NestedModelAdmin, self).log_addition(request, new_object)
-                
-#                self.save_model(request, new_object, form, False)
-#                self.save_related(request, form, formsets, False)
-#                self.log_addition(request, new_object)
-                #fix to redirect to change_list page after adding an object
-                return super(NestedModelAdmin, self).add_view(request, form_url, extra_context)
-#                return super(NestedModelAdmin, self).response_add(request, new_object)
+#            if self.all_valid_with_nesting(formsets) and form_validated:
+            if all_valid(formsets) and form_validated:#fix for double validating model
+                self.save_model(request, new_object, form, False)
+                self.save_related(request, form, formsets, False)
+                self.log_addition(request, new_object)
+                return self.response_add(request, new_object)
         else:
             # Prepare the dict of initial data from the request.
             # We have to special-case M2Ms as a list of comma-separated PKs.
@@ -222,9 +216,8 @@ class NestedModelAdmin(ModelAdmin):
             'app_label': opts.app_label,
         }
         context.update(extra_context or {})
-        return super(NestedModelAdmin, self).add_view(request, form_url, extra_context)
-#        return self.render_change_form(request, context, form_url=form_url, add=True)
-
+        return self.render_change_form(request, context, form_url=form_url, add=False)
+        
     @csrf_protect_m
     @transaction.commit_on_success
     def change_view(self, request, object_id, form_url='', extra_context=None):
@@ -239,7 +232,6 @@ class NestedModelAdmin(ModelAdmin):
 
         if obj is None:
             raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {'name': force_unicode(opts.verbose_name), 'key': escape(object_id)})
-
         if request.method == 'POST' and "_saveasnew" in request.POST:
             return self.add_view(request, form_url=reverse('admin:%s_%s_add' %
                                     (opts.app_label, opts.module_name),
@@ -269,14 +261,13 @@ class NestedModelAdmin(ModelAdmin):
                 if inline.inlines:
                     self.add_nested_inline_formsets(request, inline, formset)
 
-            if self.all_valid_with_nesting(formsets) and form_validated:
+#            if self.all_valid_with_nesting(formsets) and form_validated:
+            if all_valid(formsets) and form_validated:
                 self.save_model(request, new_object, form, True)
                 self.save_related(request, form, formsets, True)
                 change_message = self.construct_change_message(request, form, formsets)
                 self.log_change(request, new_object, change_message)
                 return self.response_change(request, new_object)
-#                return super(NestedModelAdmin, self).change_view(request, object_id, form_url, extra_context)
-
         else:
             form = ModelForm(instance=obj)
             prefixes = {}
@@ -321,7 +312,6 @@ class NestedModelAdmin(ModelAdmin):
             'app_label': opts.app_label,
         }
         context.update(extra_context or {})
-#        return super(NestedModelAdmin, self).change_view(request, object_id, form_url, extra_context)
         return self.render_change_form(request, context, change=True, obj=obj, form_url=form_url)
 
 class NestedInlineModelAdmin(InlineModelAdmin):
