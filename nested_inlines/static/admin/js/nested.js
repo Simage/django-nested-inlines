@@ -1,12 +1,14 @@
 /**
  * Django admin inlines
- *
+ * 
  * Based on jQuery Formset 1.1
  * @author Stanislaus Madueke (stan DOT madueke AT gmail DOT com)
  * @requires jQuery 1.2.6 or later
  *
  * Copyright (c) 2009, Stanislaus Madueke
  * All rights reserved.
+ * 
+ * Philip Roche - updated to avoid conflict with inlines.js
  *
  * Spiced up with Code from Zain Memon's GSoC project 2009
  * and modified for Django by Jannis Leidel, Travis Swicegood and Julien Phalip.
@@ -15,8 +17,8 @@
  * See: http://www.opensource.org/licenses/bsd-license.php
  */
 (function($) {
-	$.fn.formset = function(opts) {
-		var options = $.extend({}, $.fn.formset.defaults, opts);
+	$.fn.nestedFormset = function(opts) {
+		var options = $.extend({}, $.fn.nestedFormset.defaults, opts);
 		var $this = $(this);
 		var $parent = $this.parent();
 		var nextIndex = get_no_forms(options.prefix);
@@ -45,14 +47,15 @@
 			}
 			addButton.click(function(e) {
 				e.preventDefault();
-				addRow(options);
+                //console.log('addButtonClicked');
+				addNestedRow(options);
 			});
 		}
 		return this;
 	};
 
 	/* Setup plugin defaults */
-	$.fn.formset.defaults = {
+	$.fn.nestedFormset.defaults = {
 		prefix : "form", // The form prefix for your django formset
 		addText : "add another", // Text for the add link
 		deleteText : "remove", // Text for the delete link
@@ -116,7 +119,7 @@
 			});
 		};
 
-		$rows.formset({
+		$rows.nestedFormset({
 			prefix : options.prefix,
 			addText : options.addText,
 			formCssClass : "dynamic-" + options.prefix,
@@ -135,8 +138,8 @@
 				if(options.added) options.added(row);
 			}
 		});
-        console.log('nestedTabularFormset');
-        console.log($rows);
+        //console.log('nestedTabularFormset');
+        //console.log($rows);
 		return $rows;
 	};
 
@@ -185,7 +188,7 @@
 			});
 		};
 
-		$rows.formset({
+		$rows.nestedFormset({
 			prefix : options.prefix,
 			addText : options.addText,
 			formCssClass : "dynamic-" + options.prefix,
@@ -274,7 +277,7 @@
 			}
 			
 			//add a empty row. This will in turn create the nested formsets
-			addRow(options);
+			addNestedRow(options);
 		});
 		
 		return nested_inlines.length;
@@ -328,12 +331,13 @@
 		return parseInt(max_forms);
 	};
 	
-	function addRow(options) {
+	function addNestedRow(options) {
+        //console.log('addNestedRow');
 		var nextIndex = get_no_forms(options.prefix);
 		
-		var row = insertNewRow(options.prefix, options);
+		var row = insertNewNestedRow(options.prefix, options);
 
-		updateAddButton(options.prefix);
+		updateNestedAddButton(options.prefix);
 
 		// Add delete button handler
 		row.find("a." + options.deleteCssClass).click(function(e) {
@@ -368,10 +372,10 @@
 		nextIndex = nextIndex + 1;
 	};
 	
-	function insertNewRow(prefix, options) {
+	function insertNewNestedRow(prefix, options) {
 		var template = $("#" + prefix + "-empty");
 		var nextIndex = get_no_forms(prefix);
-		var row = prepareRowTemplate(template, prefix, nextIndex, options);
+		var row = prepareNestedRowTemplate(template, prefix, nextIndex, options);
 		// when adding something from a cloned formset the id is the same
 
 		// Insert the new form when it has been fully edited
@@ -383,7 +387,7 @@
 		return row;
 	};
 	
-	function prepareRowTemplate(template, prefix, index, options) {
+	function prepareNestedRowTemplate(template, prefix, index, options) {
 		var row = template.clone(true);
 		row.removeClass(options.emptyCssClass).addClass(options.formCssClass).attr("id", prefix + "-" + index);
 		if (row.is("tr")) {
@@ -420,7 +424,7 @@
 	};
 	
 	/** show or hide the addButton **/
-	function updateAddButton(options) {
+	function updateNestedAddButton(options) {
 		// Hide add button in case we've hit the max, except we want to add infinitely
 		var btn = $("#" + options.prefix + "-empty").parent().children('.'+options.addCssClass);
 		if (isAddButtonVisible(options)) {
