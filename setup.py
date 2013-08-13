@@ -17,6 +17,7 @@ setup(
     packages=find_packages(exclude=['tests']),
     include_package_data=True,
     license='MIT License',
+    latforms='any',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
@@ -28,4 +29,5 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
 )
+
 

@@ -1,6 +1,4 @@
 
-<!-- saved from url=(0106)https://raw.github.com/npinchot/django-nested-inlines/8565d551590ffeb6b793115e55de520959c4fa3d/MANIFEST.in -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body><pre style="word-wrap: break-word; white-space: pre-wrap;">include README.md
+include README.md
 recursive-include nested_inlines/static *
 recursive-include nested_inlines/templates *
-</pre></body></html>
