@@ -82,7 +82,7 @@
 
 <script type="text/javascript">
 (function($) {
-  $("#{{ recursive_formset.formset.prefix }}-group .tabular.inline-related tbody tr.{{ recursive_formset.formset.prefix }}-not-nested").tabularFormset({
+  $("#{{ recursive_formset.formset.prefix }}-group .tabular.inline-related tbody tr.{{ recursive_formset.formset.prefix }}-not-nested").nestedTabularFormset({
     prefix: "{{ recursive_formset.formset.prefix }}",
     adminStaticPrefix: '{% static "admin/" %}',
     addText: "{% blocktrans with recursive_formset.opts.verbose_name|title as verbose_name %}Add another {{ verbose_name }}{% endblocktrans %}",

@@ -31,7 +31,7 @@
 
 <script type="text/javascript">
 (function($) {
-  $("#{{ recursive_formset.formset.prefix }}-group > .inline-related").stackedFormset({
+  $("#{{ recursive_formset.formset.prefix }}-group > .inline-related").nestedStackedFormset({
     prefix: '{{ recursive_formset.formset.prefix }}',
     adminStaticPrefix: '{% static "admin/" %}',
     addText: "{% blocktrans with verbose_name=recursive_formset.opts.verbose_name|title %}Add another {{ verbose_name }}{% endblocktrans %}",
