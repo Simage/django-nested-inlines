@@ -10,6 +10,12 @@ except ImportError:
 from django.contrib.admin.helpers import InlineAdminFormSet, AdminForm
 from django.utils.translation import ugettext as _
 
+try:
+    # Django >= 1.8
+    from django.db.transaction import atomic as transaction_atomic
+except ImportError:
+    from django.db.transaction import commit_on_success as transaction_atomic
+
 from forms import BaseNestedModelForm, BaseNestedInlineFormSet
 from helpers import AdminErrorList
 
@@ -121,7 +127,7 @@ class NestedModelAdmin(ModelAdmin):
         return True
     
     @csrf_protect_m
-    @transaction.commit_on_success
+    @transaction_atomic
     def add_view(self, request, form_url='', extra_context=None):
         "The 'add' admin view for this model."
         model = self.model
@@ -215,7 +221,7 @@ class NestedModelAdmin(ModelAdmin):
         return self.render_change_form(request, context, form_url=form_url, add=True)
 
     @csrf_protect_m
-    @transaction.commit_on_success
+    @transaction_atomic
     def change_view(self, request, object_id, form_url='', extra_context=None):
         "The 'change' admin view for this model."
         model = self.model
